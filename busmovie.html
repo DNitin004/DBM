@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie & Bus Ticket Booking</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .tab { display: none; }
+        .tab.active { display: block; }
+        .seats { display: grid; grid-template-columns: repeat(10, 30px); gap: 5px; justify-content: center; }
+        .seat { width: 30px; height: 30px; background: lightgray; border: 1px solid #000; cursor: pointer; }
+        .seat.selected { background: green; }
+        .seat.blocked { background: red; cursor: not-allowed; }
+        .summary { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Movie & Bus Ticket Booking</h2>
+
+    <div id="movies" class="tab active">
+        <h2>Select Movie</h2>
+        <select id="movieSelect" onchange="updateSeatMap()">
+            <option value="SALAAR">SALAAR</option>
+            <option value="PUSHPA 2">PUSHPA 2</option>
+        </select>
+        <h3>Select Time</h3>
+        <select id="movieTime" onchange="updateSeatMap()">
+            <option value="11:00">11:00 AM</option>
+            <option value="2:00">2:00 PM</option>
+            <option value="6:00">6:00 PM</option>
+            <option value="9:00">9:00 PM</option>
+        </select>
+        <button onclick="showMovieSeats()">Proceed to Seat Selection</button>
+    </div>
+
+    <div id="bus" class="tab">
+        <h2>Bus Ticket Booking</h2>
+        <select id="source">
+            <option value="Chirala">Chirala</option>
+            <option value="Hyderabad">Hyderabad</option>
+        </select>
+        <select id="destination">
+            <option value="Hyderabad">Hyderabad</option>
+            <option value="Chirala">Chirala</option>
+        </select>
+        <h3>Select Time</h3>
+        <select id="busTime" onchange="updateSeatMap()">
+            <option value="10:00">10:00 AM</option>
+            <option value="2:00">2:00 PM</option>
+            <option value="6:00">6:00 PM</option>
+        </select>
+        <button onclick="showBusSeats()">Proceed to Seat Selection</button>
+    </div>
+
+    <div id="seats" class="tab">
+        <h3>Seat Selection</h3>
+        <div class="seats" id="seatMap"></div>
+        <button onclick="confirmBooking()">Confirm Booking</button>
+        <p class="summary" id="summary"></p>
+    </div>
+
+    <script>
+        let selectedSeats = new Set();
+        function showTab(tabId) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function showMovieSeats() {
+            generateSeats('movie');
+            showTab('seats');
+        }
+
+        function showBusSeats() {
+            generateSeats('bus');
+            showTab('seats');
+        }
+
+        function updateSeatMap() {
+            selectedSeats.clear();
+            document.getElementById('seatMap').innerHTML = '';
+        }
+
+        function generateSeats(type) {
+            const seatMap = document.getElementById('seatMap');
+            seatMap.innerHTML = '';
+            const time = type === 'movie' ? document.getElementById('movieTime').value : document.getElementById('busTime').value;
+            const totalSeats = type === 'movie' ? 50 : 40;
+
+            for (let i = 0; i < totalSeats; i++) {
+                const seat = document.createElement('div');
+                seat.classList.add('seat');
+                if (Math.random() < 0.2) {
+                    seat.classList.add('blocked');
+                } else {
+                    seat.addEventListener('click', () => toggleSeat(i, seat));
+                }
+                seatMap.appendChild(seat);
+            }
+        }
+
+        function toggleSeat(index, seat) {
+            if (seat.classList.contains('blocked')) return;
+            if (selectedSeats.has(index)) {
+                selectedSeats.delete(index);
+                seat.classList.remove('selected');
+            } else {
+                selectedSeats.add(index);
+                seat.classList.add('selected');
+            }
+        }
+
+        function confirmBooking() {
+            if (selectedSeats.size === 0) {
+                alert("Please select at least one seat!");
+                return;
+            }
+            const seats = Array.from(selectedSeats).map(num => `S${num + 1}`).join(', ');
+            document.getElementById('summary').innerText = `Booking Confirmed. Seats: ${seats}`;
+            alert(`Your booking is confirmed! Seats: ${seats}`);
+        }
+    </script>
+</body>
+</html>
